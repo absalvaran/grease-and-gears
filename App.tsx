@@ -4,8 +4,9 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import TimerScreen from './Screens/TimerScreen';
 import RaceScreen from './Screens/RaceScreen';
 import HomeScreen from './Screens/HomeScreen';
-// import InventoryScreen from './src/screens/InventoryScreen';
-// import BuildsScreen from './src/screens/BuildsScreen';
+import InventoryScreen from './Screens/InventoryScreen';
+import BuildsScreen from './Screens/BuildsScreen';
+import ComingSoonScreen from './Screens/ComingSoonScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -15,9 +16,10 @@ export default function App() {
       <Tab.Navigator>
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Timer" component={TimerScreen} />
-        <Tab.Screen name="Race" component={RaceScreen} />
-        {/* <Tab.Screen name="Inventory" component={InventoryScreen} /> */}
-        {/* <Tab.Screen name="Builds" component={BuildsScreen} /> */}
+        {/* <Tab.Screen name="Race" component={ComingSoonScreen} />
+        <Tab.Screen name="Inventory" component={ComingSoonScreen} />
+        <Tab.Screen name="Builds" component={ComingSoonScreen} />
+        <Tab.Screen name="Leaderboards" component={ComingSoonScreen} /> */}
       </Tab.Navigator>
     </NavigationContainer>
   );

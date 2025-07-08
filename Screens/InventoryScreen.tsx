@@ -3,17 +3,12 @@ import { View, Text, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-export default function HomeScreen() {
+export default function InventoryScreen() {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
 
   return (
     <View style={styles.container}>
-      <Text>GG App</Text>
-      <Text>Coming Soon:</Text>
-      <Text>- Race organizer</Text>
-      <Text>- Giri (photo+notes)</Text>
-      <Text>- Inventory</Text>
-      <Text>- Builds</Text>
+      <Text>Coming Soon</Text>
     </View>
   );
 }
