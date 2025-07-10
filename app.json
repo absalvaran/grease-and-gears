@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "grease-and-gears",
+    "name": "Grease and Gears",
     "slug": "grease-and-gears",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -17,13 +17,20 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.absalvaran.greaseandgears"
     },
     "web": {
-      "favicon": "./assets/favicon.png"
-    }
+      "favicon": "./assets/icon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "a8d0c73f-5a44-4f5c-8845-5c575e4c7318"
+      }
+    },
+    "owner": "absalvaran"
   }
 }
