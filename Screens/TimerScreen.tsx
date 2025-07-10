@@ -13,6 +13,8 @@ import {
   Switch,
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
+import Container from '../Components/Container';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function formatTime(ms: number): string {
   const minutes = Math.floor(ms / 60000);
@@ -21,17 +23,27 @@ function formatTime(ms: number): string {
   return `${minutes}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(3, '0')}`;
 }
 
+interface RunInterface {
+  name: string;
+  mode: string;
+  session: string;
+  time: number | number[];
+  note: string;
+  setup: string;
+  battery: string;
+  gears: string;
+}
+
 export default function TimerScreen() {
   const [isTimeAttack, setIsTimeAttack] = useState(true);
 
   const [timeAttackTimer, setTimeAttackTimer] = useState(0);
   const [isTimeAttackRunning, setIsTimeAttackRunning] = useState(false);
-  const [splits, setSplits] = useState([]);
-  const timeAttackRef = useRef(null);
+  const timeAttackRef = useRef<NodeJS.Timeout>(null);
 
   const [timers, setTimers] = useState([0, 0]);
   const [running, setRunning] = useState([false, false]);
-  const raceRef = useRef(null);
+  const raceRef = useRef<NodeJS.Timeout>(null);
 
   const [note, setNote] = useState('');
   const [setup, setSetup] = useState('');
@@ -39,11 +51,10 @@ export default function TimerScreen() {
   const [gears, setGears] = useState('');
   const [runName, setRunName] = useState('');
   const [runs, setRuns] = useState([]);
-  const [sessions, setSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState('');
   const [namePromptVisible, setNamePromptVisible] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
-  const [selected, setSelected] = useState(null);
+  const [selected, setSelected] = useState<RunInterface | null>(null);
   const [detailsVisible, setDetailsVisible] = useState(false);
   const [interactionModalVisible, setInteractionModalVisible] = useState(false);
 
@@ -75,6 +86,31 @@ export default function TimerScreen() {
     };
   }, [running]);
 
+  useEffect(() => {
+    const loadRuns = async () => {
+      try {
+        const stored = await AsyncStorage.getItem('@runs');
+        if (stored) {
+          setRuns(JSON.parse(stored));
+        }
+      } catch (err) {
+        console.error('Failed to load runs', err);
+      }
+    };
+    loadRuns();
+  }, []);
+
+  useEffect(() => {
+    const saveRuns = async () => {
+      try {
+        await AsyncStorage.setItem('@runs', JSON.stringify(runs));
+      } catch (err) {
+        console.error('Failed to save runs', err);
+      }
+    };
+    saveRuns();
+  }, [runs]);
+
   const toggleMode = () => {
     setIsTimeAttack(!isTimeAttack);
   };
@@ -91,11 +127,6 @@ export default function TimerScreen() {
   const resetTimeAttack = () => {
     setIsTimeAttackRunning(false);
     setTimeAttackTimer(0);
-    setSplits([]);
-  };
-
-  const addSplit = () => {
-    setSplits([...splits, timeAttackTimer]);
   };
 
   const startRace = () => {
@@ -103,12 +134,8 @@ export default function TimerScreen() {
     setInteractionModalVisible(true);
   };
 
-  const stopLane = index => {
+  const stopLane = (index: number) => {
     setRunning(prev => prev.map((r, i) => (i === index ? false : r)));
-  };
-
-  const stopAllLanes = () => {
-    setRunning([false, false]);
   };
 
   const resetRace = () => {
@@ -126,7 +153,7 @@ export default function TimerScreen() {
 
   const confirmSave = () => {
     if (!runName) return;
-    const run = {
+    const run: RunInterface = {
       name: runName,
       note,
       setup,
@@ -134,19 +161,21 @@ export default function TimerScreen() {
       gears,
       mode: isTimeAttack ? 'timeattack' : 'race',
       time: isTimeAttack ? timeAttackTimer : timers,
-      splits: isTimeAttack ? splits : undefined,
-      session: currentSession || null,
+      session: currentSession || '',
     };
     setRuns([...runs, run]);
     setNamePromptVisible(false);
-    setDrawerVisible(true);
     setRunName('');
     setCurrentSession('');
+    setNote('');
+    setSetup('');
+    setBattery('');
+    setGears('');
     if (isTimeAttack) resetTimeAttack();
     else resetRace();
   };
 
-  const groupRunsByModeAndSession = runs => {
+  const groupRunsByModeAndSession = (runs: RunInterface[]) => {
     const grouped = {
       timeattack: {},
       race: {},
@@ -163,7 +192,7 @@ export default function TimerScreen() {
   };
 
   return (
-    <>
+    <Container>
       <ScrollView contentContainerStyle={{ padding: 16 }}>
         <View
           style={{
@@ -191,45 +220,107 @@ export default function TimerScreen() {
               disabled={!isTimeAttackRunning || interactionModalVisible}
             />
             <Button
-              title="Split"
-              onPress={addSplit}
-              disabled={!isTimeAttackRunning}
+              title="Reset"
+              onPress={resetTimeAttack}
+              disabled={timeAttackTimer === 0}
             />
-            <Button title="Reset" onPress={resetTimeAttack} />
           </View>
         ) : (
           <View>
+            {timers.map((time, index) => (
+              <View key={index}>
+                <Text style={{ fontSize: index === 0 ? 32 : 24 }}>
+                  {index === 0 ? 'Lead Timer' : `Lag Timer`} -{' '}
+                  {formatTime(time)}
+                </Text>
+              </View>
+            ))}
             <Button
               title="Start Race"
               onPress={startRace}
               disabled={running.some(r => r)}
             />
-            {timers.map((time, index) => (
-              <View key={index}>
-                <Text>
-                  {index === 0 ? 'Lead Timer' : `Lag Timer`} -{' '}
-                  {formatTime(time)}
-                </Text>
-                <Button
-                  title="Stop"
-                  onPress={() => stopLane(index)}
-                  disabled={!running[index] || interactionModalVisible}
-                />
-              </View>
-            ))}
-            <Button title="Reset Race" onPress={resetRace} />
+            <Button
+              title="Reset Race"
+              onPress={resetRace}
+              disabled={timers[0] === 0 && timers[1] === 0}
+            />
           </View>
         )}
 
         <Button
           title="Save Run"
           onPress={handleSavePrompt}
-          disabled={isTimeAttack ? isTimeAttackRunning : !allStopped}
+          disabled={
+            isTimeAttack
+              ? timeAttackTimer === 0
+              : timers[0] === 0 && timers[1] === 0
+          }
         />
         <Button
           title="View Saved Runs"
           onPress={() => setDrawerVisible(true)}
         />
+
+        <View
+          style={{
+            borderWidth: 1,
+            borderRadius: 8,
+            padding: 8,
+            marginVertical: 16,
+          }}
+        >
+          <TextInput
+            placeholder="Notes"
+            value={note}
+            onChangeText={setNote}
+            multiline
+            numberOfLines={3}
+            style={{
+              borderBottomWidth: 1,
+              paddingBottom: 8,
+              marginBottom: 8,
+              color: 'black',
+            }}
+            placeholderTextColor={'gray'}
+          />
+
+          <Pressable onPress={() => setDetailsVisible(!detailsVisible)}>
+            <Text style={{ fontWeight: 'bold', color: 'gray' }}>
+              More details {detailsVisible ? '▲' : '▼'}
+            </Text>
+          </Pressable>
+
+          {detailsVisible && (
+            <View style={{ marginTop: 8 }}>
+              <TextInput
+                placeholder="Setup"
+                value={setup}
+                onChangeText={setSetup}
+                style={{ borderBottomWidth: 1, marginBottom: 8 }}
+                placeholderTextColor={'gray'}
+              />
+              <TextInput
+                placeholder="Battery"
+                value={battery}
+                onChangeText={setBattery}
+                style={{ borderBottomWidth: 1, marginBottom: 8 }}
+                placeholderTextColor={'gray'}
+              />
+              <Text style={{ marginBottom: 4 }}>Gear Ratio</Text>
+              <Picker
+                selectedValue={gears}
+                onValueChange={value => setGears(value)}
+                style={{ height: 60 }}
+              >
+                <Picker.Item label="Select gear ratio" value="" />
+                {['3.5', '3.7', '4.1', '4.2', '5'].map(r => (
+                  <Picker.Item key={r} label={r} value={r} />
+                ))}
+              </Picker>
+            </View>
+          )}
+        </View>
       </ScrollView>
 
       <Modal visible={interactionModalVisible} transparent animationType="fade">
@@ -271,7 +362,13 @@ export default function TimerScreen() {
           <FlatList
             data={runs}
             keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item, index }) => (
+            renderItem={({
+              item,
+              index,
+            }: {
+              item: RunInterface;
+              index: number;
+            }) => (
               <TouchableOpacity
                 onPress={() => setSelected(item)}
                 onLongPress={() => {
@@ -382,19 +479,6 @@ export default function TimerScreen() {
               <Text>{formatTime(selected.time)}</Text>
             )}
 
-            {selected.splits && (
-              <>
-                <Text style={{ fontWeight: 'bold', marginTop: 8 }}>
-                  Splits:
-                </Text>
-                {selected.splits.map((s, i) => (
-                  <Text key={i}>
-                    {i + 1}. {formatTime(s)}
-                  </Text>
-                ))}
-              </>
-            )}
-
             <Text style={{ fontWeight: 'bold', marginTop: 8 }}>Notes:</Text>
             <Text>{selected.note || 'None'}</Text>
 
@@ -446,48 +530,50 @@ export default function TimerScreen() {
                         >
                           {sessionName}
                         </Text>
-                        {sessionRuns.map((item, index) => (
-                          <TouchableOpacity
-                            key={`${item.name}-${index}`}
-                            onPress={() => setSelected(item)}
-                            onLongPress={() => {
-                              Alert.alert(
-                                'Delete Run',
-                                'Are you sure you want to delete this run?',
-                                [
-                                  { text: 'Cancel', style: 'cancel' },
-                                  {
-                                    text: 'Delete',
-                                    style: 'destructive',
-                                    onPress: () => {
-                                      setRuns(prev =>
-                                        prev.filter(
-                                          (_, i) => i !== runs.indexOf(item),
-                                        ),
-                                      );
+                        {sessionRuns.map(
+                          (item: RunInterface, index: number) => (
+                            <TouchableOpacity
+                              key={`${item.name}-${index}`}
+                              onPress={() => setSelected(item)}
+                              onLongPress={() => {
+                                Alert.alert(
+                                  'Delete Run',
+                                  'Are you sure you want to delete this run?',
+                                  [
+                                    { text: 'Cancel', style: 'cancel' },
+                                    {
+                                      text: 'Delete',
+                                      style: 'destructive',
+                                      onPress: () => {
+                                        setRuns(prev =>
+                                          prev.filter(
+                                            (_, i) => i !== runs.indexOf(item),
+                                          ),
+                                        );
+                                      },
                                     },
-                                  },
-                                ],
-                              );
-                            }}
-                            style={{
-                              paddingVertical: 8,
-                              paddingHorizontal: 12,
-                              borderBottomWidth: 1,
-                              borderColor: '#ddd',
-                              marginLeft: 16,
-                            }}
-                          >
-                            <Text style={{ fontSize: 14 }}>{item.name}</Text>
-                            <Text style={{ fontSize: 12, color: 'gray' }}>
-                              {formatTime(
-                                Array.isArray(item.time)
-                                  ? item.time[0]
-                                  : item.time,
-                              )}
-                            </Text>
-                          </TouchableOpacity>
-                        ))}
+                                  ],
+                                );
+                              }}
+                              style={{
+                                paddingVertical: 8,
+                                paddingHorizontal: 12,
+                                borderBottomWidth: 1,
+                                borderColor: '#ddd',
+                                marginLeft: 16,
+                              }}
+                            >
+                              <Text style={{ fontSize: 14 }}>{item.name}</Text>
+                              <Text style={{ fontSize: 12, color: 'gray' }}>
+                                {formatTime(
+                                  Array.isArray(item.time)
+                                    ? item.time[0]
+                                    : item.time,
+                                )}
+                              </Text>
+                            </TouchableOpacity>
+                          ),
+                        )}
                       </View>
                     ),
                   )}
@@ -499,6 +585,6 @@ export default function TimerScreen() {
           <Button title="Close" onPress={() => setDrawerVisible(false)} />
         </View>
       </Modal>
-    </>
+    </Container>
   );
 }
