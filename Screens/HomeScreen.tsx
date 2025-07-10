@@ -94,17 +94,19 @@ const styles = StyleSheet.create({
   heading: {
     fontSize: 36,
     fontWeight: '600',
+    textAlign: 'center',
   },
   subheading: {
     fontSize: 24,
     opacity: 0.75,
+    textAlign: 'center',
   },
   cardContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
     padding: 16,
-    gap: 16,
+    gap: '2%',
   },
   card: {
     borderColor: 'black',

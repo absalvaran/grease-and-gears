@@ -215,11 +215,6 @@ export default function TimerScreen() {
               disabled={isTimeAttackRunning}
             />
             <Button
-              title="Stop"
-              onPress={stopTimeAttack}
-              disabled={!isTimeAttackRunning || interactionModalVisible}
-            />
-            <Button
               title="Reset"
               onPress={resetTimeAttack}
               disabled={timeAttackTimer === 0}
@@ -352,56 +347,6 @@ export default function TimerScreen() {
             </Text>
           )}
         </Pressable>
-      </Modal>
-
-      <Modal visible={drawerVisible} transparent animationType="slide">
-        <View style={{ flex: 1, backgroundColor: 'white', padding: 16 }}>
-          <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12 }}>
-            Saved Runs
-          </Text>
-          <FlatList
-            data={runs}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({
-              item,
-              index,
-            }: {
-              item: RunInterface;
-              index: number;
-            }) => (
-              <TouchableOpacity
-                onPress={() => setSelected(item)}
-                onLongPress={() => {
-                  Alert.alert(
-                    'Delete Run',
-                    'Are you sure you want to delete this run?',
-                    [
-                      { text: 'Cancel', style: 'cancel' },
-                      {
-                        text: 'Delete',
-                        style: 'destructive',
-                        onPress: () => {
-                          setRuns(prev => prev.filter((_, i) => i !== index));
-                        },
-                      },
-                    ],
-                  );
-                }}
-                style={{
-                  padding: 12,
-                  borderBottomWidth: 1,
-                  borderColor: '#ccc',
-                }}
-              >
-                <Text>{item.name}</Text>
-                <Text style={{ fontSize: 12, color: 'gray' }}>
-                  {item.mode} — {item.session || 'No session'}
-                </Text>
-              </TouchableOpacity>
-            )}
-          />
-          <Button title="Close" onPress={() => setDrawerVisible(false)} />
-        </View>
       </Modal>
 
       <Modal visible={namePromptVisible} transparent animationType="fade">
