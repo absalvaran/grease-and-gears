@@ -15,6 +15,7 @@ import {
 import { Picker } from '@react-native-picker/picker';
 import Container from '../Components/Container';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Accordion from '../Components/Accordion';
 
 function formatTime(ms: number): string {
   const minutes = Math.floor(ms / 60000);
@@ -464,61 +465,55 @@ export default function TimerScreen() {
                   {Object.entries(sessions).map(
                     ([sessionName, sessionRuns]) => (
                       <View key={sessionName} style={{ marginBottom: 12 }}>
-                        <Text
-                          style={{
-                            fontWeight: 'bold',
-                            fontSize: 16,
-                            marginBottom: 4,
-                            marginLeft: 8,
-                            color: '#555',
-                          }}
-                        >
-                          {sessionName}
-                        </Text>
-                        {sessionRuns.map(
-                          (item: RunInterface, index: number) => (
-                            <TouchableOpacity
-                              key={`${item.name}-${index}`}
-                              onPress={() => setSelected(item)}
-                              onLongPress={() => {
-                                Alert.alert(
-                                  'Delete Run',
-                                  'Are you sure you want to delete this run?',
-                                  [
-                                    { text: 'Cancel', style: 'cancel' },
-                                    {
-                                      text: 'Delete',
-                                      style: 'destructive',
-                                      onPress: () => {
-                                        setRuns(prev =>
-                                          prev.filter(
-                                            (_, i) => i !== runs.indexOf(item),
-                                          ),
-                                        );
+                        <Accordion title={sessionName} defaultExpanded>
+                          {sessionRuns.map(
+                            (item: RunInterface, index: number) => (
+                              <TouchableOpacity
+                                key={`${item.name}-${index}`}
+                                onPress={() => setSelected(item)}
+                                onLongPress={() => {
+                                  Alert.alert(
+                                    'Delete Run',
+                                    'Are you sure you want to delete this run?',
+                                    [
+                                      { text: 'Cancel', style: 'cancel' },
+                                      {
+                                        text: 'Delete',
+                                        style: 'destructive',
+                                        onPress: () => {
+                                          setRuns(prev =>
+                                            prev.filter(
+                                              (_, i) =>
+                                                i !== runs.indexOf(item),
+                                            ),
+                                          );
+                                        },
                                       },
-                                    },
-                                  ],
-                                );
-                              }}
-                              style={{
-                                paddingVertical: 8,
-                                paddingHorizontal: 12,
-                                borderBottomWidth: 1,
-                                borderColor: '#ddd',
-                                marginLeft: 16,
-                              }}
-                            >
-                              <Text style={{ fontSize: 14 }}>{item.name}</Text>
-                              <Text style={{ fontSize: 12, color: 'gray' }}>
-                                {formatTime(
-                                  Array.isArray(item.time)
-                                    ? item.time[0]
-                                    : item.time,
-                                )}
-                              </Text>
-                            </TouchableOpacity>
-                          ),
-                        )}
+                                    ],
+                                  );
+                                }}
+                                style={{
+                                  paddingVertical: 8,
+                                  paddingHorizontal: 12,
+                                  borderBottomWidth: 1,
+                                  borderColor: '#ddd',
+                                  marginLeft: 16,
+                                }}
+                              >
+                                <Text style={{ fontSize: 14 }}>
+                                  {item.name}
+                                </Text>
+                                <Text style={{ fontSize: 12, color: 'gray' }}>
+                                  {formatTime(
+                                    Array.isArray(item.time)
+                                      ? item.time[0]
+                                      : item.time,
+                                  )}
+                                </Text>
+                              </TouchableOpacity>
+                            ),
+                          )}
+                        </Accordion>
                       </View>
                     ),
                   )}
