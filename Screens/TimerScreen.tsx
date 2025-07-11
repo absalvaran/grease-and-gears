@@ -35,6 +35,11 @@ interface RunInterface {
   gears: string;
 }
 
+type GroupedRunsType = {
+  timeattack: Record<string, RunInterface[]>;
+  race: Record<string, RunInterface[]>;
+};
+
 export default function TimerScreen() {
   const [isTimeAttack, setIsTimeAttack] = useState(true);
 
@@ -51,7 +56,7 @@ export default function TimerScreen() {
   const [battery, setBattery] = useState('');
   const [gears, setGears] = useState('');
   const [runName, setRunName] = useState('');
-  const [runs, setRuns] = useState([]);
+  const [runs, setRuns] = useState<RunInterface[]>([]);
   const [currentSession, setCurrentSession] = useState('');
   const [namePromptVisible, setNamePromptVisible] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -177,15 +182,17 @@ export default function TimerScreen() {
   };
 
   const groupRunsByModeAndSession = (runs: RunInterface[]) => {
-    const grouped = {
+    const grouped: GroupedRunsType = {
       timeattack: {},
       race: {},
     };
 
     for (const run of runs) {
-      const mode = run.mode;
+      const mode = run.mode as keyof GroupedRunsType;
       const session = run.session || 'No Session';
-      if (!grouped[mode][session]) grouped[mode][session] = [];
+      if (!grouped[mode][session]) {
+        grouped[mode][session] = [];
+      }
       grouped[mode][session].push(run);
     }
 
@@ -281,41 +288,39 @@ export default function TimerScreen() {
             placeholderTextColor={'gray'}
           />
 
-          <Pressable onPress={() => setDetailsVisible(!detailsVisible)}>
+          {/* <Pressable onPress={() => setDetailsVisible(!detailsVisible)}>
             <Text style={{ fontWeight: 'bold', color: 'gray' }}>
               More details {detailsVisible ? '▲' : '▼'}
             </Text>
-          </Pressable>
+          </Pressable> */}
 
-          {detailsVisible && (
-            <View style={{ marginTop: 8 }}>
-              <TextInput
-                placeholder="Setup"
-                value={setup}
-                onChangeText={setSetup}
-                style={{ borderBottomWidth: 1, marginBottom: 8 }}
-                placeholderTextColor={'gray'}
-              />
-              <TextInput
-                placeholder="Battery"
-                value={battery}
-                onChangeText={setBattery}
-                style={{ borderBottomWidth: 1, marginBottom: 8 }}
-                placeholderTextColor={'gray'}
-              />
-              <Text style={{ marginBottom: 4 }}>Gear Ratio</Text>
-              <Picker
-                selectedValue={gears}
-                onValueChange={value => setGears(value)}
-                style={{ height: 60 }}
-              >
-                <Picker.Item label="Select gear ratio" value="" />
-                {['3.5', '3.7', '4.1', '4.2', '5'].map(r => (
-                  <Picker.Item key={r} label={r} value={r} />
-                ))}
-              </Picker>
-            </View>
-          )}
+          <View style={{ marginTop: 8 }}>
+            <TextInput
+              placeholder="Setup"
+              value={setup}
+              onChangeText={setSetup}
+              style={{ borderBottomWidth: 1, marginBottom: 8 }}
+              placeholderTextColor={'gray'}
+            />
+            <TextInput
+              placeholder="Battery"
+              value={battery}
+              onChangeText={setBattery}
+              style={{ borderBottomWidth: 1, marginBottom: 8 }}
+              placeholderTextColor={'gray'}
+            />
+            <Text style={{ marginBottom: 4 }}>Gear Ratio</Text>
+            <Picker
+              selectedValue={gears}
+              onValueChange={value => setGears(value)}
+              style={{ height: 60 }}
+            >
+              <Picker.Item label="Select gear ratio" value="" />
+              {['3.5', '3.7', '4.1', '4.2', '5'].map(r => (
+                <Picker.Item key={r} label={r} value={r} />
+              ))}
+            </Picker>
+          </View>
         </View>
       </ScrollView>
 
