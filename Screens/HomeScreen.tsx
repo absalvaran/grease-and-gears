@@ -30,13 +30,20 @@ export default function HomeScreen() {
         >
           <Text style={[styles.cardText, { color: 'white' }]}>Timer</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.card} disabled>
-          <Text style={styles.cardText}>Race</Text>
-          <View
+        <TouchableOpacity
+          style={[
+            styles.card,
+            { backgroundColor: '#06cceeff', borderWidth: 0 },
+          ]}
+          disabled={false}
+          onPress={() => navigation.navigate('Race')}
+        >
+          <Text style={[styles.cardText, { color: 'white' }]}>Race</Text>
+          {/* <View
             style={{ position: 'absolute', transform: [{ rotate: '-45deg' }] }}
           >
             <Text style={styles.comingSoon}>Coming Soon</Text>
-          </View>
+          </View> */}
         </TouchableOpacity>
         <TouchableOpacity style={styles.card} disabled>
           <Text style={styles.cardText}>Motor Checker</Text>

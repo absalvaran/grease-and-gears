@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import TimerScreen from './Screens/TimerScreen';
-import RaceScreen from './Screens/RaceScreen';
+import TournamentScreen from './Screens/TournamentScreen';
 import HomeScreen from './Screens/HomeScreen';
 import InventoryScreen from './Screens/InventoryScreen';
 import BuildsScreen from './Screens/BuildsScreen';
@@ -40,6 +40,11 @@ export default function App() {
         <Stack.Screen
           name="Timer"
           component={TimerScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Tournament"
+          component={TournamentScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
