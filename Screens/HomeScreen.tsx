@@ -30,6 +30,14 @@ export default function HomeScreen() {
         >
           <Text style={[styles.cardText, { color: 'white' }]}>Timer</Text>
         </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.card, { backgroundColor: '#1fb555', borderWidth: 0 }]}
+          onPress={() => navigation.navigate('Camera Timer')}
+        >
+          <Text style={[styles.cardText, { color: 'white' }]}>
+            Camera Timer
+          </Text>
+        </TouchableOpacity>
         <TouchableOpacity style={styles.card} disabled>
           <Text style={styles.cardText}>Race</Text>
           <View

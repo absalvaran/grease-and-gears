@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import TimerScreen from './Screens/TimerScreen';
+import CameraTimerScreen from './Screens/CameraTimerScreen';
 import RaceScreen from './Screens/RaceScreen';
 import HomeScreen from './Screens/HomeScreen';
 import InventoryScreen from './Screens/InventoryScreen';
@@ -40,6 +41,16 @@ export default function App() {
         <Stack.Screen
           name="Timer"
           component={TimerScreen}
+          options={{ headerShown: false }}
+        />
+        {/* <Stack.Screen
+          name="Camera Timer"
+          component={CameraTimerScreen}
+          options={{ headerShown: false }}
+        /> */}
+        <Stack.Screen
+          name="Camera Timer"
+          component={CameraTimerScreen}
           options={{ headerShown: false }}
         />
       </Stack.Navigator>
